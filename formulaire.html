@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulaire avec 3 Champs</title>
+</head>
+<body>
+    <form id="monFormulaire">
+        <h2>Section</h2>
+        <label for="nom">Nom:</label>
+        <input type="text" id="nom" name="nom" required><br><br>
+        <label for="api">API:</label>
+        <input type="text" id="api" name="api" required><br><br>
+        <label for="apikey">API Key:</label>
+        <input type="text" id="apikey" name="apikey" required><br><br>
+        
+        <input type="submit" value="Soumettre">
+    </form>
+
+    <div id="resultat" style="display:none;">
+        <h2>Résultats</h2>
+        <p id="resultatText"></p>
+    </div>
+
+    <script>
+        async function sendFormDataToGraphQL(nom, api, apikey) {
+            const query = `
+                mutation {
+                    createData(input: {
+                        nom: "${nom}",
+                        api: "${api}",
+                        apikey: "${apikey}"
+                    }) {
+                        id
+                        nom
+                        api
+                        apikey
+                    }
+                }
+            `;
+
+            const response = await fetch("https://your-graphql-api.example.com/graphql", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ query })
+            });
+
+            const result = await response.json();
+            return result.data.createData;
+        }
+
+        document.getElementById("monFormulaire").addEventListener("submit", async function(e) {
+            e.preventDefault();
+
+            const nom = document.getElementById("nom").value;
+            const api = document.getElementById("api").value;
+            const apikey = document.getElementById("apikey").value;
+
+            const newData = await sendFormDataToGraphQL(nom, api, apikey);
+            const resultatText = `ID: ${newData.id}<br>Nom: ${newData.nom}<br>API: ${newData.api}<br>API Key: ${newData.apikey}`;
+            document.getElementById("resultatText").innerHTML = resultatText;
+            document.getElementById("resultat").style.display = "block";
+        });
+    </script>
+</body>
+</html>
+
